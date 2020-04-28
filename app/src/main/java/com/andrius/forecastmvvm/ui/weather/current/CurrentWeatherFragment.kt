@@ -1,14 +1,19 @@
 package com.andrius.forecastmvvm.ui.weather.current
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 
 import com.andrius.forecastmvvm.R
 import com.andrius.forecastmvvm.data.network.ApixuWeatherApiService
+import com.andrius.forecastmvvm.data.network.ConnectivityInterceptorImpl
+import com.andrius.forecastmvvm.data.network.WeatherNetworkDataSourceImpl
 import kotlinx.android.synthetic.main.current_weather_fragment.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -31,14 +36,19 @@ class CurrentWeatherFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(CurrentWeatherViewModel::class.java)
+
+        viewModel = ViewModelProvider(this).get(CurrentWeatherViewModel::class.java)
         // TODO: Use the ViewModel
 
-        val apiService =
-            ApixuWeatherApiService()
+        val apiService = ApixuWeatherApiService(ConnectivityInterceptorImpl(this.requireContext()))
+        val weatherNetworkDataSource = WeatherNetworkDataSourceImpl(apiService)
+        weatherNetworkDataSource.downloadedCurrentWeather.observe(viewLifecycleOwner, Observer {
+            textView.text = it.toString()
+        })
+
         GlobalScope.launch(Dispatchers.Main) {
-            val currentWeatherResponse = apiService.getCurrentWeather("London", "en").await()
-            textView.text = currentWeatherResponse.toString()
+            //val currentWeatherResponse = apiService.getCurrentWeather("London", "en").await()
+            weatherNetworkDataSource.fetchCurrentWeather("London", "en" )
         }
     }
 

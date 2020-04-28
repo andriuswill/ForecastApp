@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.unitlocalized
+package com.andrius.forecastmvvm.data.db.unitlocalized
 
 import androidx.room.ColumnInfo
 
@@ -15,7 +15,7 @@ data class MetricCurrentWeatherEntry(
     override val windDirection: String,
     @ColumnInfo(name = "precipMm")
     override val precipitationVolume: Double,
-    @ColumnInfo(name = "feelsLikeC")
+    @ColumnInfo(name = "feelslikeC")
     override val feelsLikeTemperature: Double,
     @ColumnInfo(name = "visKm")
     override val visibilityDistance: Double

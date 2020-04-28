@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.db
+package com.andrius.forecastmvvm.data.db.entity
 
 
 import androidx.room.Embedded

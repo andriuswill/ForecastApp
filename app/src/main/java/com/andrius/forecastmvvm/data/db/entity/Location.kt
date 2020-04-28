@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.db
+package com.andrius.forecastmvvm.data.db.entity
 
 
 import com.google.gson.annotations.SerializedName
