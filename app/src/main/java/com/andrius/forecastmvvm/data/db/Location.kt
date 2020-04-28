@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.response
+package com.andrius.forecastmvvm.data.db
 
 
 import com.google.gson.annotations.SerializedName

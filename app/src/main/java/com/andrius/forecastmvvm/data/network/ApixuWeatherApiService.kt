@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data
+package com.andrius.forecastmvvm.data.network
 
 import com.andrius.forecastmvvm.data.response.CurrentWeatherResponse
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -18,7 +18,8 @@ interface ApixuWeatherApiService {
 
     @GET("current.json")
     fun getCurrentWeather(
-        @Query("q") location: String
+        @Query("q") location: String,
+        @Query("lang") language: String
     ): Deferred<CurrentWeatherResponse>
 
     companion object {
@@ -28,7 +29,9 @@ interface ApixuWeatherApiService {
                 val url = chain.request()
                     .url()
                     .newBuilder()
-                    .addQueryParameter("key", API_KEY)
+                    .addQueryParameter("key",
+                        API_KEY
+                    )
                     .build()
 
                 val request = chain.request()

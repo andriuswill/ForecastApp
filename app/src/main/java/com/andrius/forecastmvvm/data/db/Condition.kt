@@ -1,8 +1,10 @@
-package com.andrius.forecastmvvm.data.response
+package com.andrius.forecastmvvm.data.db
 
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
 
+//@Entity(tableName = "entity")
 data class Condition(
     val text: String,
     val icon: String,
