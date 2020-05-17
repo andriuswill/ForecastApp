@@ -30,8 +30,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
 
     override val kodein by closestKodein()
 
-    private val viewModelFactory: CurrentWeatherViewModelFactory  by instance()
-
+    private val viewModelFactory: CurrentWeatherViewModelFactory by instance<CurrentWeatherViewModelFactory>()
     companion object {
         fun newInstance() = CurrentWeatherFragment()
     }
@@ -50,24 +49,20 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(CurrentWeatherViewModel::class.java)
         bindUI()
-        /*val apiService = ApixuWeatherApiService(ConnectivityInterceptorImpl(this.requireContext()))
-        val weatherNetworkDataSource = WeatherNetworkDataSourceImpl(apiService)
-        weatherNetworkDataSource.downloadedCurrentWeather.observe(viewLifecycleOwner, Observer {
-            textView.text = it.toString()
-        })
 
-        GlobalScope.launch(Dispatchers.Main) {
-            //val currentWeatherResponse = apiService.getCurrentWeather("London", "en").await()
-            weatherNetworkDataSource.fetchCurrentWeather("London", "en" )
-        }*/
     }
 
     private fun bindUI() = launch {
-        val currentWeathe = viewModel.weather.await()
-        currentWeathe.observe(viewLifecycleOwner, Observer {
+        val currentWeather = viewModel.weather.await()
+        val currentLocation = viewModel.weatherlocation.await()
+
+        currentLocation.observe(viewLifecycleOwner, Observer { location ->
+            if(location == null) return@Observer
+            updateLocation(location.name)
+        })
+        currentWeather.observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
             group_loading.visibility = View.GONE
-            updateLocation("Los Angeles")
             updateDateToToday()
             updateTemperatures(it.temperature, it.feelsLikeTemperature)
             updateCondition(it.conditionText)
