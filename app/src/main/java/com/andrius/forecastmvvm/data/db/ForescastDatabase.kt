@@ -1,22 +1,20 @@
 package com.andrius.forecastmvvm.data.db
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room.*
 import com.andrius.forecastmvvm.data.db.entity.CurrentWeatherEntry
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
-import com.andrius.forecastmvvm.data.db.unitlocalized.WeatherLocationDao
 
 
 @Database(
     entities = [CurrentWeatherEntry::class, WeatherLocation::class],
     version = 1
 )
-
+@TypeConverters(LocalDateConverter::class)
 abstract class ForescastDatabase : RoomDatabase() {
 
     abstract fun currentWeatherDao(): CurrentWeatherDao
+    abstract fun futureWeatherDao(): FutureWeatherDao
     abstract fun weatherLocationDao(): WeatherLocationDao
 
     companion object {

@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.db.unitlocalized
+package com.andrius.forecastmvvm.data.db.unitlocalized.current
 
 interface UnitSpecificCurrentWeatherEntry {
     val temperature: Double

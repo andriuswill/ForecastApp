@@ -1,6 +1,7 @@
 package com.andrius.forecastmvvm.data.network
 
 import com.andrius.forecastmvvm.data.network.response.CurrentWeatherResponse
+import com.andrius.forecastmvvm.data.network.response.FutureWeatherResponse
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
@@ -11,34 +12,40 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 const val API_KEY = "c31e8fd540404bbfa3a111608202704"
-
-//https://api.weatherapi.com/v1/current.json?key=c31e8fd540404bbfa3a111608202704&q=London
+const val BASE_URL = "https://api.weatherapi.com/v1/"
 
 interface ApixuWeatherApiService {
 
+    //https://api.weatherapi.com/v1/current.json?key=c31e8fd540404bbfa3a111608202704&q=London
     @GET("current.json")
     fun getCurrentWeather(
         @Query("q") location: String,
-        @Query("lang") language: String
+        @Query("lang") language: String = "en"
     ): Deferred<CurrentWeatherResponse>
 
-    companion object {
+    //https://api.weatherapi.com/v1/forecast.json?key=c31e8fd540404bbfa3a111608202704&q=London&days=7
+    @GET("forecast.json")
+    fun getFutureWeather(
+        @Query("q") location: String,
+        @Query("days") days: Int,
+        @Query("lang") language: String = "en"
+    ): Deferred<FutureWeatherResponse>
 
+    companion object {
         operator fun invoke(
             connectivityInterceptor: ConnectivityInterceptor
         ): ApixuWeatherApiService {
             val requestInterceptor = Interceptor { chain ->
+
                 val url = chain.request()
                     .url()
                     .newBuilder()
                     .addQueryParameter("key", API_KEY)
                     .build()
-
                 val request = chain.request()
                     .newBuilder()
                     .url(url)
                     .build()
-
                 return@Interceptor chain.proceed(request)
             }
 
@@ -49,7 +56,7 @@ interface ApixuWeatherApiService {
 
             return Retrofit.Builder()
                 .client(okHttpClient)
-                .baseUrl("https://api.weatherapi.com/v1/")
+                .baseUrl(BASE_URL)
                 .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

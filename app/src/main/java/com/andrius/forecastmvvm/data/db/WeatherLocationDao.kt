@@ -1,4 +1,4 @@
-package com.andrius.forecastmvvm.data.db.unitlocalized
+package com.andrius.forecastmvvm.data.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

@@ -3,8 +3,8 @@ package com.andrius.forecastmvvm.data.repository
 import androidx.lifecycle.LiveData
 import com.andrius.forecastmvvm.data.db.CurrentWeatherDao
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
-import com.andrius.forecastmvvm.data.db.unitlocalized.UnitSpecificCurrentWeatherEntry
-import com.andrius.forecastmvvm.data.db.unitlocalized.WeatherLocationDao
+import com.andrius.forecastmvvm.data.db.unitlocalized.current.UnitSpecificCurrentWeatherEntry
+import com.andrius.forecastmvvm.data.db.WeatherLocationDao
 import com.andrius.forecastmvvm.data.network.WeatherNetworkDataSource
 import com.andrius.forecastmvvm.data.network.response.CurrentWeatherResponse
 import com.andrius.forecastmvvm.data.provider.LocationProvider
