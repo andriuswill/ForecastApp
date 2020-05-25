@@ -16,10 +16,10 @@ interface FutureWeatherDao {
     fun insert(futureWeatherEntries: List<FutureWeatherEntry>)
 
     @Query("select * from future_weather where date(date)  >= date(:startDate)")
-    fun getSimpleWeatherForecastMetric(startDate: LocalDate): LiveData<MetricSpecificSimpleFutureWeatherEntry>
+    fun getSimpleWeatherForecastMetric(startDate: LocalDate): LiveData<List<MetricSpecificSimpleFutureWeatherEntry>>
 
     @Query("select * from future_weather where date(date)  >= date(:startDate)")
-    fun getSimpleWeatherForecastImperial(startDate: LocalDate): LiveData<ImperialSpecificSimpleFutureWeatherEntry>
+    fun getSimpleWeatherForecastImperial(startDate: LocalDate): LiveData<List<ImperialSpecificSimpleFutureWeatherEntry>>
 
     @Query("select count(id) from future_weather where date(date)  >= date(:startDate)")
     fun countFutureWeather(startDate: LocalDate): Int

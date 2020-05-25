@@ -13,6 +13,7 @@ import com.andrius.forecastmvvm.data.provider.UnitProviderImpl
 import com.andrius.forecastmvvm.data.repository.ForecastRepository
 import com.andrius.forecastmvvm.data.repository.ForecastRepositoryImpl
 import com.andrius.forecastmvvm.ui.weather.current.CurrentWeatherViewModelFactory
+import com.andrius.forecastmvvm.ui.weather.future.list.FutureListWeatherViewModelFactory
 import com.google.android.gms.location.LocationServices
 import com.jakewharton.threetenabp.AndroidThreeTen
 import org.kodein.di.Kodein
@@ -29,7 +30,9 @@ class ForecastApplication: Application(), KodeinAware {
         import(androidXModule(this@ForecastApplication))
 
         bind() from singleton { ForescastDatabase(instance()) }
+
         bind() from singleton { instance<ForescastDatabase>().currentWeatherDao()}
+        bind() from singleton { instance<ForescastDatabase>().futureWeatherDao()}
         bind() from singleton { instance<ForescastDatabase>().weatherLocationDao()}
 
         bind<ConnectivityInterceptor>() with singleton { ConnectivityInterceptorImpl(instance()) }
@@ -37,9 +40,12 @@ class ForecastApplication: Application(), KodeinAware {
         bind<WeatherNetworkDataSource>() with singleton { WeatherNetworkDataSourceImpl(instance()) }
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
-        bind<ForecastRepository>() with singleton { ForecastRepositoryImpl(instance(),instance(), instance(), instance()) }
+        bind<ForecastRepository>() with singleton { ForecastRepositoryImpl(instance(),instance(), instance(), instance(), instance()) }
         bind<UnitProvider>() with singleton { UnitProviderImpl(instance()) }
+
         bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
+        bind() from provider { FutureListWeatherViewModelFactory(instance(), instance()) }
+
     }
 
     override fun onCreate() {

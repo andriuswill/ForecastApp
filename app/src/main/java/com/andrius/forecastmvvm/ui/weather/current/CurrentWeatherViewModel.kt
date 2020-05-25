@@ -5,21 +5,15 @@ import com.andrius.forecastmvvm.data.provider.UnitProvider
 import com.andrius.forecastmvvm.data.repository.ForecastRepository
 import com.andrius.forecastmvvm.internal.UnitSystem
 import com.andrius.forecastmvvm.internal.lazyDeferred
+import com.andrius.forecastmvvm.ui.base.WeatherViewModel
 
 class CurrentWeatherViewModel(
     private val forecastRepository: ForecastRepository,
     unitProvider: UnitProvider
-) : ViewModel() {
-
-    private val unitSystem = unitProvider.getUnitSystem()
-
-    val isMetric: Boolean
-        get() = unitSystem == UnitSystem.METRIC
+) : WeatherViewModel(forecastRepository, unitProvider) {
 
     val weather by lazyDeferred {
-        forecastRepository.getCurrentWeather(isMetric)
+        forecastRepository.getCurrentWeather(super.isMetricUnit)
     }
 
-    val weatherlocation by lazyDeferred {
-        forecastRepository.getWeatherlocation()
-    }}
+}

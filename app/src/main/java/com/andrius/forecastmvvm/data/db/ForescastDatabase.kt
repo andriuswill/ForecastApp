@@ -3,11 +3,12 @@ package com.andrius.forecastmvvm.data.db
 import android.content.Context
 import androidx.room.*
 import com.andrius.forecastmvvm.data.db.entity.CurrentWeatherEntry
+import com.andrius.forecastmvvm.data.db.entity.FutureWeatherEntry
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
 
 
 @Database(
-    entities = [CurrentWeatherEntry::class, WeatherLocation::class],
+    entities = [CurrentWeatherEntry::class, FutureWeatherEntry::class, WeatherLocation::class],
     version = 1
 )
 @TypeConverters(LocalDateConverter::class)

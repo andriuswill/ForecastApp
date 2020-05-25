@@ -2,39 +2,64 @@ package com.andrius.forecastmvvm.data.repository
 
 import androidx.lifecycle.LiveData
 import com.andrius.forecastmvvm.data.db.CurrentWeatherDao
+import com.andrius.forecastmvvm.data.db.FutureWeatherDao
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
 import com.andrius.forecastmvvm.data.db.unitlocalized.current.UnitSpecificCurrentWeatherEntry
 import com.andrius.forecastmvvm.data.db.WeatherLocationDao
+import com.andrius.forecastmvvm.data.db.unitlocalized.future.UnitSpecificSimpleFutureWeatherEntry
+import com.andrius.forecastmvvm.data.network.FORECAST_DAYS_COUNT
 import com.andrius.forecastmvvm.data.network.WeatherNetworkDataSource
 import com.andrius.forecastmvvm.data.network.response.CurrentWeatherResponse
+import com.andrius.forecastmvvm.data.network.response.FutureWeatherResponse
 import com.andrius.forecastmvvm.data.provider.LocationProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.threeten.bp.LocalDate
 import java.time.ZonedDateTime
 import java.util.*
 
 class ForecastRepositoryImpl(
     private val currentWeatherDao: CurrentWeatherDao,
+    private val futureWeatherDao: FutureWeatherDao,
     private val weatherLocationDao: WeatherLocationDao,
     private val weatherNetworkDataSource: WeatherNetworkDataSource,
     private val locationProvider: LocationProvider
 ): ForecastRepository {
 
     init {
-        weatherNetworkDataSource.downloadedCurrentWeather.observeForever { newCurrentWeather ->
-            persistFetchedCurrentWeather(newCurrentWeather)
+        weatherNetworkDataSource.apply {
+            downloadedCurrentWeather.observeForever { newCurrentWeather ->
+                persistFetchedCurrentWeather(newCurrentWeather)
+            }
+            downloadedFutureWeather.observeForever { newFutureWeather ->
+                persistFetchedFutureWeather(newFutureWeather)
+            }
         }
     }
 
     override suspend fun getCurrentWeather(metric: Boolean): LiveData<out UnitSpecificCurrentWeatherEntry> {
-        initWeatherData()
         return  withContext(Dispatchers.IO){
+            initWeatherData()
             return@withContext if (metric){
                 currentWeatherDao.getWeatherMetric()
             } else {
                 currentWeatherDao.getWeatherImperial()
+            }
+        }
+    }
+
+    override suspend fun getFutureWeatherList(
+        startDate: LocalDate,
+        metric: Boolean
+    ): LiveData<out List<UnitSpecificSimpleFutureWeatherEntry>> {
+        return  withContext(Dispatchers.IO){
+            initWeatherData()
+            return@withContext if (metric){
+                futureWeatherDao.getSimpleWeatherForecastMetric(startDate)
+            } else {
+                futureWeatherDao.getSimpleWeatherForecastImperial(startDate)
             }
         }
     }
@@ -52,16 +77,35 @@ class ForecastRepositoryImpl(
         }
     }
 
+    private fun persistFetchedFutureWeather(fetchedWeather: FutureWeatherResponse){
+        fun deleteOldForecastData(){
+            val today = LocalDate.now()
+            futureWeatherDao.deleteOldEntries(today)
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            deleteOldForecastData()
+            val futureWeatherList = fetchedWeather.futureWeatherEntries.entries
+            futureWeatherDao.insert(futureWeatherList)
+            weatherLocationDao.upsert(fetchedWeather.location)
+        }
+    }
+
     private suspend fun initWeatherData(){
-        val lastWeatherLocation = weatherLocationDao.getLocation().value
+        val lastWeatherLocation = weatherLocationDao.getLocationNonLive()
 
         if (lastWeatherLocation == null || locationProvider.hasLocationChanged(lastWeatherLocation)){
             fetchCurrentWeather()
+            fetchFutureWeather()
             return
         }
 
         if (isFetchCurrentNeeded(lastWeatherLocation.zoneDateTime)){
             fetchCurrentWeather()
+        }
+
+        if (isFetchFutureNeeded()){
+            fetchFutureWeather()
         }
     }
 
@@ -72,8 +116,21 @@ class ForecastRepositoryImpl(
         )
     }
 
+    private suspend fun fetchFutureWeather(){
+        weatherNetworkDataSource.fetchFutureWeather(
+            locationProvider.getPreferredLocationString(),
+            Locale.getDefault().language
+        )
+    }
+
     private fun isFetchCurrentNeeded(lastFetchTime: ZonedDateTime): Boolean{
         val thirtyminutesAgo = ZonedDateTime.now().minusMinutes(30)
         return lastFetchTime.isBefore(thirtyminutesAgo)
+    }
+
+    private fun isFetchFutureNeeded(): Boolean{
+        val today = LocalDate.now()
+        val futureWeatherCount = futureWeatherDao.countFutureWeather(today)
+        return futureWeatherCount < FORECAST_DAYS_COUNT
     }
 }
