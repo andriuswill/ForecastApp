@@ -1,12 +1,9 @@
 package com.andrius.forecastmvvm.data.db.entity
 
-
 import androidx.room.Embedded
-import com.andrius.forecastmvvm.data.db.entity.Condition
 import com.google.gson.annotations.SerializedName
 
 data class Day(
-    val avghumidity: Double,
     @SerializedName("avgtemp_c")
     val avgtempC: Double,
     @SerializedName("avgtemp_f")

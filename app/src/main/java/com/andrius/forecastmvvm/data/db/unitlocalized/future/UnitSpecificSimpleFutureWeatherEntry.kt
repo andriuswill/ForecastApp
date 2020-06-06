@@ -6,5 +6,5 @@ interface UnitSpecificSimpleFutureWeatherEntry {
     val date: LocalDate
     val avgTemperature: Double
     val conditionText: String
-    val conditionIconUri: String
+    val conditionIconUrl: String
 }

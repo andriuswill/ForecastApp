@@ -1,11 +1,13 @@
 package com.andrius.forecastmvvm.data.network
 
+import com.andrius.forecastmvvm.BuildConfig
 import com.andrius.forecastmvvm.data.network.response.CurrentWeatherResponse
 import com.andrius.forecastmvvm.data.network.response.FutureWeatherResponse
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -49,10 +51,21 @@ interface ApixuWeatherApiService {
                 return@Interceptor chain.proceed(request)
             }
 
+            val interceptor = HttpLoggingInterceptor()
+
+            interceptor.level = if (BuildConfig.DEBUG)
+                HttpLoggingInterceptor.Level.BODY
+            else
+                HttpLoggingInterceptor.Level.NONE
+
+
             val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
                 .addInterceptor(requestInterceptor)
                 .addInterceptor(connectivityInterceptor)
                 .build()
+
+
 
             return Retrofit.Builder()
                 .client(okHttpClient)

@@ -1,7 +1,10 @@
 package com.andrius.forecastmvvm.data.db
 
 import android.content.Context
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.andrius.forecastmvvm.data.db.entity.CurrentWeatherEntry
 import com.andrius.forecastmvvm.data.db.entity.FutureWeatherEntry
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
@@ -11,6 +14,7 @@ import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
     entities = [CurrentWeatherEntry::class, FutureWeatherEntry::class, WeatherLocation::class],
     version = 1
 )
+
 @TypeConverters(LocalDateConverter::class)
 abstract class ForescastDatabase : RoomDatabase() {
 
@@ -28,7 +32,7 @@ abstract class ForescastDatabase : RoomDatabase() {
 
         private fun buildDatabase(context: Context) =
             Room.databaseBuilder(context.applicationContext,
-                ForescastDatabase::class.java, "forecast.db")
+                ForescastDatabase::class.java, "futureWeatherEntries2.db")
                 .build()
     }
 

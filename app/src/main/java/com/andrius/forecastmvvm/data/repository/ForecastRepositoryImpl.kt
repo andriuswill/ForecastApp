@@ -57,9 +57,9 @@ class ForecastRepositoryImpl(
         return  withContext(Dispatchers.IO){
             initWeatherData()
             return@withContext if (metric){
-                futureWeatherDao.getSimpleWeatherForecastMetric(startDate)
+                futureWeatherDao.getSimpleWeatherForecastsMetric(startDate)
             } else {
-                futureWeatherDao.getSimpleWeatherForecastImperial(startDate)
+                futureWeatherDao.getSimpleWeatherForecastsImperial(startDate)
             }
         }
     }

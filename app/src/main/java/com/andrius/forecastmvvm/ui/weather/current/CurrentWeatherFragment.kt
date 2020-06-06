@@ -31,9 +31,6 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
     override val kodein by closestKodein()
 
     private val viewModelFactory: CurrentWeatherViewModelFactory by instance<CurrentWeatherViewModelFactory>()
-    companion object {
-        fun newInstance() = CurrentWeatherFragment()
-    }
 
     private lateinit var viewModel: CurrentWeatherViewModel
 
@@ -52,7 +49,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
 
     }
 
-    private fun bindUI() = launch {
+    private fun bindUI() = launch(Dispatchers.Main){
         val currentWeather = viewModel.weather.await()
         val currentLocation = viewModel.weatherlocation.await()
 
@@ -77,7 +74,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
     }
 
     private fun chooseLocalizedUnitAbbreviation(metric: String, imperial: String): String {
-        return if (viewModel.isMetric) metric else imperial
+        return if (viewModel.isMetricUnit) metric else imperial
     }
 
     private fun updateLocation(location: String) {

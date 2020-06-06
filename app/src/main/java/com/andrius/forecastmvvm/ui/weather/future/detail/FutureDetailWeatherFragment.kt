@@ -11,10 +11,6 @@ import com.andrius.forecastmvvm.R
 
 class FutureDetailWeatherFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = FutureDetailWeatherFragment()
-    }
-
     private lateinit var viewModel: FutureDetailWeatherViewModel
 
     override fun onCreateView(

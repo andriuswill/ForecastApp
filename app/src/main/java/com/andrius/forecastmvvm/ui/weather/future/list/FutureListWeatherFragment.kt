@@ -1,19 +1,33 @@
 package com.andrius.forecastmvvm.ui.weather.future.list
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.andrius.forecastmvvm.R
+import com.andrius.forecastmvvm.data.db.LocalDateConverter
+import com.andrius.forecastmvvm.data.db.unitlocalized.future.UnitSpecificSimpleFutureWeatherEntry
+import com.andrius.forecastmvvm.ui.base.ScopeFragment
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.ViewHolder
+import kotlinx.android.synthetic.main.future_list_weather_fragment.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.x.closestKodein
+import org.kodein.di.generic.instance
+import org.threeten.bp.LocalDate
 
-class FutureListWeatherFragment : Fragment() {
+class FutureListWeatherFragment : ScopeFragment(), KodeinAware {
 
-    companion object {
-        fun newInstance() = FutureListWeatherFragment()
-    }
+    override val kodein by closestKodein()
+    val viewModelFactory: FutureListWeatherViewModelFactory by instance<FutureListWeatherViewModelFactory>()
 
     private lateinit var viewModel: FutureListWeatherViewModel
 
@@ -26,8 +40,64 @@ class FutureListWeatherFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(FutureListWeatherViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel = ViewModelProvider(this, viewModelFactory).get(FutureListWeatherViewModel::class.java)
+        bindUI()
     }
 
+    private fun bindUI() = launch(Dispatchers.Main){
+        val futureWeatherEntries = viewModel.weatherEntries.await()
+        val currentLocation = viewModel.weatherlocation.await()
+
+        currentLocation.observe(viewLifecycleOwner, Observer { location ->
+            if (location == null) return@Observer
+            updateLocation(location.name)
+        })
+
+        futureWeatherEntries.observe(viewLifecycleOwner, Observer { weatherEntries ->
+            if (weatherEntries                                                                                                                                                      == null) return@Observer
+            group_loading.visibility = View.GONE
+            updateDateToNextWeek()
+            initRecyclerView(weatherEntries.toFutureWeatherItems())
+
+        })
+    }
+
+    private fun updateLocation(location: String) {
+        (activity as? AppCompatActivity)?.supportActionBar?.title = location
+    }
+
+    private fun updateDateToNextWeek() {
+        (activity as? AppCompatActivity)?.supportActionBar?.subtitle = "Next Week"
+    }
+
+    private fun List<UnitSpecificSimpleFutureWeatherEntry>.toFutureWeatherItems() : List<FutureWeatherItem> {
+        return this.map {
+            FutureWeatherItem(it)
+        }
+    }
+
+    private fun initRecyclerView(items: List<FutureWeatherItem>) {
+        val groupAdapter = GroupAdapter<ViewHolder>().apply {
+            addAll(items)
+        }
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@FutureListWeatherFragment.context)
+            adapter = groupAdapter
+        }
+
+        groupAdapter.setOnItemClickListener { item, view ->
+            (item as? FutureWeatherItem)?.let { item ->
+                item.weatherEntry.date?.let {
+                    showWeatherDetail(it, view)
+                }
+            }
+        }
+    }
+
+    private fun showWeatherDetail(date: LocalDate, view: View) {
+        /*val dateString = LocalDateConverter.dateToString(date)!!
+        val actionDetail = FutureListWeatherFragmentDirections.actionDetail(dateString)
+        Navigation.findNavController(view).navigate(actionDetail)*/
+    }
 }
