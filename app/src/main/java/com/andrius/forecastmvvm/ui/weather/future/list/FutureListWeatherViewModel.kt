@@ -15,6 +15,4 @@ class FutureListWeatherViewModel(
         val today = LocalDate.now()
         forecastRepository.getFutureWeatherList(today, super.isMetricUnit)
     }
-
-
 }

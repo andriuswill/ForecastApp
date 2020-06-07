@@ -6,7 +6,8 @@ import com.andrius.forecastmvvm.data.db.FutureWeatherDao
 import com.andrius.forecastmvvm.data.db.entity.WeatherLocation
 import com.andrius.forecastmvvm.data.db.unitlocalized.current.UnitSpecificCurrentWeatherEntry
 import com.andrius.forecastmvvm.data.db.WeatherLocationDao
-import com.andrius.forecastmvvm.data.db.unitlocalized.future.UnitSpecificSimpleFutureWeatherEntry
+import com.andrius.forecastmvvm.data.db.unitlocalized.future.detail.UnitSpecificDetailFutureWeatherEntry
+import com.andrius.forecastmvvm.data.db.unitlocalized.future.list.UnitSpecificSimpleFutureWeatherEntry
 import com.andrius.forecastmvvm.data.network.FORECAST_DAYS_COUNT
 import com.andrius.forecastmvvm.data.network.WeatherNetworkDataSource
 import com.andrius.forecastmvvm.data.network.response.CurrentWeatherResponse
@@ -61,6 +62,17 @@ class ForecastRepositoryImpl(
             } else {
                 futureWeatherDao.getSimpleWeatherForecastsImperial(startDate)
             }
+        }
+    }
+
+    override suspend fun getFutureWeatherByDate(
+        date: LocalDate,
+        metric: Boolean
+    ): LiveData<out UnitSpecificDetailFutureWeatherEntry> {
+        return withContext(Dispatchers.IO){
+            initWeatherData()
+            return@withContext if(metric) futureWeatherDao.getDetailedWeatherByDateMetric(date)
+            else futureWeatherDao.getDetailedWeatherByDateImperial(date)
         }
     }
 

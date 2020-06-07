@@ -1,9 +1,6 @@
 package com.andrius.forecastmvvm.ui.weather.current
 
-import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,16 +9,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 
 import com.andrius.forecastmvvm.R
-import com.andrius.forecastmvvm.data.network.ApixuWeatherApiService
-import com.andrius.forecastmvvm.data.network.ConnectivityInterceptorImpl
-import com.andrius.forecastmvvm.data.network.WeatherNetworkDataSourceImpl
 import com.andrius.forecastmvvm.internal.glide.GlideApp
 import com.andrius.forecastmvvm.ui.base.ScopeFragment
 import kotlinx.android.synthetic.main.current_weather_fragment.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.closestKodein
 import org.kodein.di.generic.instance
@@ -51,7 +43,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware {
 
     private fun bindUI() = launch(Dispatchers.Main){
         val currentWeather = viewModel.weather.await()
-        val currentLocation = viewModel.weatherlocation.await()
+        val currentLocation = viewModel.weatherLocation.await()
 
         currentLocation.observe(viewLifecycleOwner, Observer { location ->
             if(location == null) return@Observer

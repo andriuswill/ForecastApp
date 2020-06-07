@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.preference.PreferenceManager
 import com.andrius.forecastmvvm.data.db.ForescastDatabase
-import com.andrius.forecastmvvm.data.db.ForescastDatabase_Impl
 import com.andrius.forecastmvvm.data.network.*
 import com.andrius.forecastmvvm.data.provider.LocationProvider
 import com.andrius.forecastmvvm.data.provider.LocationProviderImpl
@@ -13,16 +12,15 @@ import com.andrius.forecastmvvm.data.provider.UnitProviderImpl
 import com.andrius.forecastmvvm.data.repository.ForecastRepository
 import com.andrius.forecastmvvm.data.repository.ForecastRepositoryImpl
 import com.andrius.forecastmvvm.ui.weather.current.CurrentWeatherViewModelFactory
+import com.andrius.forecastmvvm.ui.weather.future.detail.FutureDetailWeatherViewModelFactory
 import com.andrius.forecastmvvm.ui.weather.future.list.FutureListWeatherViewModelFactory
 import com.google.android.gms.location.LocationServices
 import com.jakewharton.threetenabp.AndroidThreeTen
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.androidXModule
-import org.kodein.di.generic.bind
-import org.kodein.di.generic.instance
-import org.kodein.di.generic.provider
-import org.kodein.di.generic.singleton
+import org.kodein.di.generic.*
+import org.threeten.bp.LocalDate
 
 class ForecastApplication: Application(), KodeinAware {
 
@@ -45,6 +43,8 @@ class ForecastApplication: Application(), KodeinAware {
 
         bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
         bind() from provider { FutureListWeatherViewModelFactory(instance(), instance()) }
+
+        bind() from factory { detailDate: LocalDate -> FutureDetailWeatherViewModelFactory(detailDate, instance(), instance()) }
 
     }
 

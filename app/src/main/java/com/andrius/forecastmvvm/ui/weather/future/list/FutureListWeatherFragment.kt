@@ -1,6 +1,7 @@
 package com.andrius.forecastmvvm.ui.weather.future.list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.andrius.forecastmvvm.R
 import com.andrius.forecastmvvm.data.db.LocalDateConverter
-import com.andrius.forecastmvvm.data.db.unitlocalized.future.UnitSpecificSimpleFutureWeatherEntry
+import com.andrius.forecastmvvm.data.db.unitlocalized.future.list.UnitSpecificSimpleFutureWeatherEntry
 import com.andrius.forecastmvvm.ui.base.ScopeFragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
@@ -23,11 +24,12 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.closestKodein
 import org.kodein.di.generic.instance
 import org.threeten.bp.LocalDate
+import java.lang.Exception
 
 class FutureListWeatherFragment : ScopeFragment(), KodeinAware {
 
     override val kodein by closestKodein()
-    val viewModelFactory: FutureListWeatherViewModelFactory by instance<FutureListWeatherViewModelFactory>()
+    private val viewModelFactory: FutureListWeatherViewModelFactory by instance<FutureListWeatherViewModelFactory>()
 
     private lateinit var viewModel: FutureListWeatherViewModel
 
@@ -46,7 +48,7 @@ class FutureListWeatherFragment : ScopeFragment(), KodeinAware {
 
     private fun bindUI() = launch(Dispatchers.Main){
         val futureWeatherEntries = viewModel.weatherEntries.await()
-        val currentLocation = viewModel.weatherlocation.await()
+        val currentLocation = viewModel.weatherLocation.await()
 
         currentLocation.observe(viewLifecycleOwner, Observer { location ->
             if (location == null) return@Observer
@@ -87,17 +89,19 @@ class FutureListWeatherFragment : ScopeFragment(), KodeinAware {
         }
 
         groupAdapter.setOnItemClickListener { item, view ->
-            (item as? FutureWeatherItem)?.let { item ->
-                item.weatherEntry.date?.let {
-                    showWeatherDetail(it, view)
-                }
+            (item as? FutureWeatherItem)?.let {
+                showWeatherDetail(it.weatherEntry.date, view)
             }
         }
     }
 
     private fun showWeatherDetail(date: LocalDate, view: View) {
-        /*val dateString = LocalDateConverter.dateToString(date)!!
-        val actionDetail = FutureListWeatherFragmentDirections.actionDetail(dateString)
-        Navigation.findNavController(view).navigate(actionDetail)*/
+        try {
+            val dateString = LocalDateConverter.dateToString(date)!!
+            val actionDetail = FutureListWeatherFragmentDirections.actionDetail(dateString)
+            Navigation.findNavController(view).navigate(actionDetail)
+        } catch (e: Exception) {
+            Log.e("ForecastApp", e.message.toString())
+        }
     }
 }
